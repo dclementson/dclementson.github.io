@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+  <head>
+      <title>ESP32 Web DRO</title>
+      <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+      <!-- <meta content="utf-8" http-equiv="encoding"> -->
+      <meta charset="UTF-8">
+      <meta name="google" content="notranslate">
+      <meta http-equiv="Content-Language" content="en">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="shortcut icon" href="favicon.ico">
+  </head>
+  <style>
+    * {
+      box-sizing: border-box;
+      touch-action: manipulation;
+    }
+    .pageContainer{
+        display: -webkit-box;  /* legacy Android */
+        display: -webkit-flex;  /* legacy Android */
+        display: -ms-flexbox;  /* legacy Android */
+        display: flex;
+        flex-direction: column;
+        width: 100vw;
+        align-items: center;
+        justify-content: flex-start;
+        border: solid 2px black;
+        background-color: LightGrey;
+    }
+    .banner {
+        font-size: 4vmin;
+        padding: 1px 1px;
+        border-top: solid 2px black;
+        border-left: solid 2px black;
+        border-right: solid 2px black;
+        width: 100vmin;
+        text-align: center;
+        font-family: monospace;
+        font-weight: 900;
+        background-color: #66ccff;
+    }
+    .axisGroup{
+        display: -webkit-box;  /* legacy Android */
+        display: -webkit-flex;  /* legacy Android */
+        display: -ms-flexbox;  /* legacy Android */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        border: solid 2px black;
+        color: Black;
+        width: 100vmin;
+    };
+    .axisContainer{
+        display: -webkit-box;  /* legacy Android */
+        display: -webkit-flex;  /* legacy Android */
+        display: -ms-flexbox;  /* legacy Android */
+        display: flex;
+        flex-direction: column;
+        width: 95vmin;
+        height: 15vmin;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        /* height: 70%; */
+    }
+    .targetContainer{
+        display: -webkit-box;  /* legacy Android */
+        display: -webkit-flex;  /* legacy Android */
+        display: -ms-flexbox;  /* legacy Android */
+        display: flex;
+        flex-direction: row;
+        width: 50vmin;
+        /* height: 40vmin; */
+        justify-content: center;
+    }
+    .readoutContainer{
+        display: -webkit-box;  /* legacy Android */
+        display: -webkit-flex;  /* legacy Android */
+        display: -ms-flexbox;  /* legacy Android */
+        display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      height: 10vmin;
+      height: 100%;
+      justify-content: left;
+      align-items: center;
+      align-content: stretch;
+      width: 100%;
+      text-align: center;
+      /* background-color: LightBlue; */
+      /* border: 2px solid Black; */
+      font-family: monospace;
+    }
+    .readoutContainer :nth-child(1) { order: 2; }
+    .readoutContainer :nth-child(2) { order: 1; }
+    .readoutContainer :nth-child(3) { order: 3; }
+    .readoutContainer :nth-child(4) { order: 4; }
+    .readoutContainer :nth-child(5) { order: 5; }
+
+    .readoutContainer > div {
+      text-align: left;
+      /* height: 100%; */
+}
+    .readout {
+        flex-grow: 1;
+        width: 60%;
+        height: 10vmin;
+        border: 2px solid Black;
+        font-size: 5.0vmin;
+        padding: 2%  0 1% 0;
+        font-weight: 900;
+        background-color: LightBlue;
+        vertical-align: middle;
+    }
+    .textEntry {
+        flex-grow: 1;
+        display: -webkit-box;  /* legacy Android */
+        display: -webkit-flex;  /* legacy Android */
+        display: -ms-flexbox;  /* legacy Android */
+        display: flex;
+        flex-direction: column;
+        width: 30%;
+        text-align: center;
+        /* font-size: 2.5vmin; */
+        /* font-weight: 900; */
+        /* margin: 0px; */
+        border: solid 2px black;
+        background-color: LightBlue;
+        height: 10vmin;
+        padding: 1px  1px;
+
+    }
+    .textEntry :nth-child(1) { order: 1; }
+    .textEntry :nth-child(2) { order: 2; }
+
+    .highlight {
+        background-color: white;
+    }
+    .textHeader{
+        text-align: center;
+        font-size: 2.0vmin;
+        font-weight: 900;
+        margin: 0px;
+        border-bottom: solid 2px black;
+        background-color: LightBlue;
+        padding: 1px 1px;
+    }
+    .textValue {
+        flex-grow: 0;
+        height: 5vmin;
+        background-color: SkyBlue;
+        font-size: 3.5vmin;
+        font-family: monospace;
+        font-weight: 900;
+        color: black;
+        opacity: 1;
+        width: 100%;
+        height: 100%;
+        text-align: right;
+        padding: 1px 1px;
+        vertical-align: middle;
+    }
+    .textValue--highlight {
+      background-color: white;
+    }
+    .clrButton {
+          flex-grow: 0;
+          background-color: SkyBlue;
+          border: solid 2px black;
+          color: Black;
+          padding: 3px 5px;
+          text-align: center;
+          font-size: 6vmin;
+          font-weight: 900;
+          font-family: monospace;
+          cursor:pointer;
+          /* width: 9%; */
+          height: 10vmin;
+          border-radius: 7px;
+          margin: 1px;
+        }
+    .clrButton--highlight {
+        background-color: white;
+    }
+    .preButton {
+          flex-grow: 0;
+          background-color: SkyBlue;
+          border: solid 2px black;
+          color: Black;
+          padding: 1px 1px;
+          text-align: center;
+          font-size: 3.5vmin;
+          font-weight: 900;
+          font-family: monospace;
+          cursor:pointer;
+          /* width: 9%; */
+          height: 10vmin;
+          border-radius: 7px;
+          margin: 1px;
+          writing-mode: vertical-lr;
+          text-orientation: upright;
+        }
+    .preButton--highlight {
+        border: solid 3px red;
+    }
+
+    .button {
+          display: inline-block;
+          background-color: SkyBlue;
+          border: solid 2px black;
+          color: Black;
+          padding: 1px 1px;
+          text-align: center;
+          font-size: 3vmin;
+          font-weight: 900;
+          font-family: monospace;
+          cursor:pointer;
+          width: 16vmin;
+          height: 8vmin;
+          margin-top:3px;
+          margin-bottom:3px;
+          margin-left: 3px;
+          margin-right: 3px;
+          border-radius: 7px;
+        }
+        .button--highlight {
+            border: solid 4px red;
+        }
+    .button-group {
+      /* float: left; */
+      display: -webkit-box;  /* legacy Android */
+      display: -webkit-flex;  /* legacy Android */
+      display: -ms-flexbox;  /* legacy Android */
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: center;
+      justify-content: center;
+      border: solid 2px black;
+      color: Black;
+      width: 100vmin;
+      /* padding: 5px 5px; */
+      text-align: center;
+    }
+    /* .button-group button:not(:last-child) {
+      margin-right: 0px;
+      }
+    .button-group:after {
+      content: "";
+      clear: both;
+      display: table;
+    } */
+    .bottomGroup {
+        display: -webkit-box;  /* legacy Android */
+        display: -webkit-flex;  /* legacy Android */
+        display: -ms-flexbox;  /* legacy Android */
+        display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: stretch;
+      justify-content: space-around;
+      justify-content: space-between;  /* legacy Android */
+      border: solid 2px black;
+      color: Black;
+      width: 100vmin;
+    }
+
+    .targCanvas{
+        width: 100%;
+        height: 100%;
+        border: solid 2px black;
+        background: White;
+    }
+    .toGoCanvas{
+        background: White;
+        height: 5vmin;
+        width: 95vmin;
+        border: solid 2px black;
+    }
+    ::placeholder {
+        color: black;
+        opacity: 1;
+    }
+    .keypad {
+        display: -webkit-box;  /* legacy Android */
+        display: -webkit-flex;  /* legacy Android */
+        display: -ms-flexbox;  /* legacy Android */
+        display: flex;
+      /* align-items: center; */
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-content: flex-start;
+      width: 35vmin;
+      /* height: 50vmin; */
+      font-size: 3.0vmin;
+      font-family: monospace;
+      /* height: 70vmin; */
+    }
+
+    .keypadKey {
+      background-color: SkyBlue;
+      color: Black;
+      width: 10vmin;
+      height: 8vmin;
+      padding: 1px 1px;
+      text-align: center;
+      font-size: 4.0vmin;
+      font-family: monospace;
+      font-weight: 900;
+      border: solid 1px black;
+      break-inside: avoid;
+      margin: 1px;
+      border-radius: 7px;
+
+    }
+    .keyWide{
+        float: right;
+        width: 20vmin;
+    }
+  </style>
+
+  <body onload="javascript:WebSocketDisplay()">
+    <div class="pageContainer">
+        <div class="banner">ESP32 Web-Based DRO</div>
+        <div class="axisGroup">
+            <div class="axisContainer">
+                  <div class="readoutContainer">
+                      <div class="readout" id="absX">&nbsp;X:&nbsp;</div>
+                      <button id="zeroXBut" class="clrButton" onclick="zeroX()">C</button>
+                      <button id="preXBut" class="preButton" onclick="preX()">P 0</button>
+                      <div class="textEntry">
+                          <div id="textLblX" class="textHeader"></div>
+                          <div id="textX" class="textValue">0</div>
+                      </div>
+                      <button id="editXBut" class="clrButton" onclick="editX()">E</button>
+                  </div>
+                  <div><canvas id="toGoXCanv" class="toGoCanvas" width="600" height="100"></canvas></div>
+            </div>
+            <div class="axisContainer">
+                  <div class="readoutContainer">
+                      <div class="readout" id="absY">&nbsp;Y:&nbsp;</div>
+                      <button id="zeroYBut" class="clrButton" onclick="zeroY()">C</button>
+                      <button id="preYBut" class="preButton" onclick="preY()">P 0</button>
+                      <div class="textEntry">
+                          <div  id="textLblY" class="textHeader"></div>
+                          <div id="textY" class="textValue">0</div>
+                      </div>
+                      <button id="editYBut" class="clrButton" onclick="editY()">E</button>
+                  </div>
+                  <div><canvas id="toGoYCanv" class="toGoCanvas" width="600" height="100"></canvas></div>
+            </div>
+            <div class="axisContainer">
+                  <div class="readoutContainer">
+                      <div class="readout" id="absZ">&nbsp;Z:&nbsp;</div>
+                      <button id="zeroZBut" class="clrButton" onclick="zeroZ()">C</button>
+                      <button id="preZBut" class="preButton" onclick="preZ()">P 0</button>
+                      <div class="textEntry">
+                          <div  id="textLblZ" class="textHeader"></div>
+                          <div id="textZ" class="textValue">0</div>
+                      </div>
+                      <button id="editZBut" class="clrButton" onclick="editZ()">E</button>
+                  </div>
+                  <div><canvas id="toGoZCanv" class="toGoCanvas" width="600" height="100"></canvas></div>
+            </div>
+        </div>
+        <div class="button-group">
+          <button id="zeroBut" class="button" onclick="zeroAll()">Zero XYZ</button>
+          <button id="toggleUnitsBut" class="button"  onclick="toggleUnits()">Units: Inches</button>
+          <button id="toggleTarget" class="button"  onclick="toggleTgtDisp()">Hide Target</button>
+          <button id="toglAbsRelBut" class="button"  onclick="toggleAbsRel()">Absolute</button>
+          <button id="toggleTargetBut" class="button" onclick="toggleTarget()">Position Mode</button>
+          <button id="modeBut" class="button" onClick=nextTxtMode() >Disp Mode</button>
+        </div>
+        <div class="bottomGroup">
+                <div class="targetContainer">
+                    <canvas class="targCanvas" id="targetCanvas" width="300" height="300">
+                    </canvas>
+                </div>
+                <div class="keypad">
+                    <button class="keypadKey">7</button>
+                    <button class="keypadKey">8</button>
+                    <button class="keypadKey">9</button>
+                    <button class="keypadKey">4</button>
+                    <button class="keypadKey">5</button>
+                    <button class="keypadKey">6</button>
+                    <button class="keypadKey">1</button>
+                    <button class="keypadKey">2</button>
+                    <button class="keypadKey">3</button>
+                    <button class="keypadKey">0</button>
+                    <button data-action="decimal" class="keypadKey">.</button>
+                    <button data-action="plusMinus" class="keypadKey">+/-</button>
+                    <button data-action="backspace" class="keypadKey">&#9003;</button>
+                    <button data-action="enter" class="keypadKey keyWide">&#9166;</button>
+                    <p>v.43</p>
+                </div>
+        </div>
+    </div>
+
+    <script type = "text/javascript">
+    <!-- =================  Scripts  ===================== -->
+    var encoderScale = 2000;
+    var editFlag = false; // true while editing a numeric value
+    var mmFlag = false;
+    var targShow = true;
+    var targMode = false;
+    var absRelFlag = true;
+    var keyBuf = 0;
+    var units =  1;
+
+    var dispTxtModes = ["relOfst", "tgt", "tol", "preVal"];
+    var dispTxtLabel = ["Relative Offset", "Target Position", "Tolerance", "Preset Value"];
+    var txtMode = 2;
+
+    var preModes = ["preNone", "prePlus", "preMinus"];
+    var preLabel = ["P 0", "P +", "P -"];
+    var preModeX = 0;
+    var preModeY = 0;
+    var preModeZ = 0;
+
+    var axX = {tag: "X", enc: 0, absOfst: 0, rel: 0,
+                relOfst: 0, tgt: 0, tol: 0, scale: encoderScale, preVal: 0, preSign: 0};
+    var axY = {tag: "Y", enc: 0, absOfst: 0, rel: 0,
+                relOfst: 0, tgt: 0, tol: 0, scale: encoderScale, preVal: 0, preSign: 0};
+    var axZ = {tag: "Z", enc: 0, absOfst: 0, rel: 0,
+                relOfst: 0, tgt: 0, tol: 0, scale: encoderScale, preVal: 0, preSign: 0};
+
+    var editAxis = axX;
+    var radius = 8;
+    var tick = 14;
+    var targetCanvas = document.getElementById("targetCanvas");
+    var toGoXCanvas = document.getElementById("toGoXCanv");
+    var toGoYCanvas = document.getElementById("toGoYCanv");
+    var toGoZCanvas = document.getElementById("toGoZCanv");
+
+    // drawTarget(targetCanvas, 0.0, -0.0);
+    // drawToGo(toGoXCanvas, -0.5);
+    // drawToGo(toGoYCanvas, 0.5);
+    // drawToGo(toGoZCanvas, 0.0);
+
+    const keys = document.querySelector(".keypad");
+    var display = document.getElementById("textX");
+    showDisp();
+
+    // keys.addEventListener("click", e => {
+    keys.addEventListener("click", keyHandler);
+
+    function keyHandler(e) {
+      if (editFlag) {
+          if (e.target.matches("button")) {
+              const key = e.target;
+              const action = key.dataset.action;
+              const keyContent = key.textContent;
+              const displayedNum = display.textContent;
+
+              if (!action) {
+                  if (displayedNum === "0") {
+                      display.textContent = keyContent;
+                  } else {
+                    display.textContent = displayedNum + keyContent;
+                  }
+              }
+              if (action === "decimal") {
+                  if (!displayedNum.includes('.')) {
+                    display.textContent = displayedNum + '.';
+                  }
+              }
+              if (action === "plusMinus") {
+                  if (displayedNum.charAt(0) === "-") {
+                      display.textContent = displayedNum.substr(1);
+                  } else {
+                      display.textContent = "-" + displayedNum;
+                  }            }
+              if (action === "backspace") {
+                  display.textContent = displayedNum.substr(0, displayedNum.length - 1);
+              }
+              if (action === "enter") {
+                  var result = parseFloat(displayedNum);
+                  editAxis[dispTxtModes[txtMode]] = result;
+                  display.innerHTML = formatDRO(result);
+                  display.classList.remove("textValue--highlight");
+                  edButton.classList.remove("clrButton--highlight");
+                  editFlag = false;
+              }
+          }
+      }
+  };
+
+    function editX() {
+      if (!editFlag) {
+        editFlag = true;
+        edButton = document.getElementById("editXBut");
+        edButton.classList.add("clrButton--highlight");
+        display = document.getElementById("textX");
+        display.classList.add("textValue--highlight");
+        display.innerHTML = "0";
+        editAxis = axX;
+    } else {
+        display.innerHTML = formatDRO(axX[dispTxtModes[txtMode]]);
+        display.classList.remove("textValue--highlight");
+        edButton.classList.remove("clrButton--highlight");
+        editFlag = false;
+        };
+    };
+
+    function editY() {
+      if (!editFlag) {
+        editFlag = true;
+        edButton = document.getElementById("editYBut");
+        edButton.classList.add("clrButton--highlight");
+        display = document.getElementById("textY");
+        display.classList.add("textValue--highlight");
+        display.innerHTML = "0";
+        editAxis = axY;
+    } else {
+        display.innerHTML = formatDRO(axY[dispTxtModes[txtMode]]);
+        display.classList.remove("textValue--highlight");
+        edButton.classList.remove("clrButton--highlight");
+        editFlag = false;
+        };
+    };
+
+    function editZ() {
+      if (!editFlag) {
+        editFlag = true;
+        edButton = document.getElementById("editZBut");
+        edButton.classList.add("clrButton--highlight");
+        display = document.getElementById("textZ");
+        display.classList.add("textValue--highlight");
+        display.innerHTML = "0";
+        editAxis = axZ;
+    } else {
+        display.innerHTML = formatDRO(axZ[dispTxtModes[txtMode]]);
+        display.classList.remove("textValue--highlight");
+        edButton.classList.remove("clrButton--highlight");
+        editFlag = false;
+        };
+    };
+
+    function preX() {
+        preModeX = (preModeX + 1) % preModes.length;
+        document.getElementById("preXBut").innerHTML = preLabel[preModeX];
+        switch (preModes[preModeX]) {
+            case 'preNone' :
+            axX.preSign = 0;
+            document.getElementById("preXBut").classList.remove("preButton--highlight");
+            break;
+            case 'prePlus' :
+            axX.preSign = 1;
+            document.getElementById("preXBut").classList.add("preButton--highlight");
+            break;
+            case 'preMinus' :
+            axX.preSign = -1;
+            document.getElementById("preXBut").classList.add("preButton--highlight");
+            break;
+        }
+    };
+    function preY() {
+        preModeY = (preModeY + 1) % preModes.length;
+        document.getElementById("preYBut").innerHTML = preLabel[preModeY];
+        switch (preModes[preModeY]) {
+            case 'preNone' :
+            axY.preSign = 0;
+            document.getElementById("preYBut").classList.remove("preButton--highlight");
+            break;
+            case 'prePlus' :
+            axY.preSign = 1;
+            document.getElementById("preYBut").classList.add("preButton--highlight");
+            break;
+            case 'preMinus' :
+            axY.preSign = -1;
+            document.getElementById("preYBut").classList.add("preButton--highlight");
+            break;
+        }
+    };
+
+    function preZ() {
+        preModeZ = (preModeZ + 1) % preModes.length;
+        document.getElementById("preZBut").innerHTML = preLabel[preModeZ];
+        switch (preModes[preModeZ]) {
+            case 'preNone' :
+            axZ.preSign = 0;
+            document.getElementById("preZBut").classList.remove("preButton--highlight");
+            break;
+            case 'prePlus' :
+            axZ.preSign = 1;
+            document.getElementById("preZBut").classList.add("preButton--highlight");
+            break;
+            case 'preMinus' :
+            axZ.preSign = -1;
+            document.getElementById("preZBut").classList.add("preButton--highlight");
+            break;
+        }
+    };
+
+
+    function nextTxtMode() {
+      txtMode = (txtMode + 1) % dispTxtModes.length;
+      showDisp();
+  };
+
+    function showDisp() {
+      document.getElementById("textX").innerHTML = formatDRO(axX[dispTxtModes[txtMode]]);
+      document.getElementById("textLblX").innerHTML = axX.tag + ' ' + dispTxtLabel[txtMode];
+      document.getElementById("textY").innerHTML = formatDRO(axY[dispTxtModes[txtMode]]);
+      document.getElementById("textLblY").innerHTML = axY.tag + ' ' + dispTxtLabel[txtMode];
+      document.getElementById("textZ").innerHTML = formatDRO(axZ[dispTxtModes[txtMode]]);
+      document.getElementById("textLblZ").innerHTML = axZ.tag + ' ' + dispTxtLabel[txtMode];
+    };
+
+    function drawToGo (canvas, num, tol) {
+      var ctx = canvas.getContext("2d");
+      var height = canvas.height;
+      var width = canvas.width;
+      var center = width/2;
+      var middle = height/2;
+      var target = center + num * center;
+      var tolL = center - tol * center;
+      var tolR = center + tol * center;
+      var tickwidth = width / 100;
+
+      if (mmFlag == true) {
+          ctx.fillStyle = "LightYellow";
+      } else {
+          ctx.fillStyle = "White";
+      }
+      ctx.fillRect(0, 0, width, height);
+      ctx.beginPath();
+      ctx.moveTo(tolL,0);
+      ctx.lineTo(tolR,0);
+      ctx.lineTo(tolR,height);
+      ctx.lineTo(tolL,height);
+      ctx.closePath();
+      ctx.fillStyle = "LightGreen";
+      ctx.lineWidth = 1;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(center,0);
+      ctx.lineTo(center,height);
+      ctx.strokeStyle="Black";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(center,middle);
+      ctx.lineTo(target, middle);
+      ctx.strokeStyle="Red";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(target,0);
+      ctx.lineTo(target + tickwidth, middle);
+      ctx.lineTo(target,height);
+      ctx.lineTo(target - tickwidth, middle);
+      ctx.closePath();
+      if (tolL <= target && target <= tolR) {
+        ctx.fillStyle="Green";
+      } else {
+      ctx.fillStyle="Red";
+      }
+      ctx.lineWidth = 2;
+      ctx.fill();
+    }
+
+    function drawTarget(canvas, cursorX, cursorY, tolX, tolY) {
+      var ctx = canvas.getContext("2d");
+      var width = canvas.width;
+      var height = canvas.height;
+      var center = width / 2;
+      var middle = height / 2;
+      var targetX = center + cursorX * center;
+      var targetY = middle - cursorY * middle;
+      var tolXP = center + tolX * center;
+      var tolXN = center - tolX * center;
+      var tolYP = middle + tolY * middle;
+      var tolYN = middle - tolY * middle;
+      ctx.fillStyle = "White";
+      ctx.fillRect(0, 0, width, height);
+      ctx.beginPath();
+      ctx.moveTo(tolXN,tolYN);
+      ctx.lineTo(tolXP,tolYN);
+      ctx.lineTo(tolXP,tolYP);
+      ctx.lineTo(tolXN,tolYP);
+      ctx.closePath();
+      ctx.strokeStyle="Black";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.fillStyle = "LightGreen";
+      ctx.lineWidth = 1;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(0,middle);
+      ctx.lineTo(width,middle);
+      ctx.moveTo(center,0);
+      ctx.lineTo(center,height);
+      ctx.strokeStyle="Black";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(targetX - tick, targetY);
+      ctx.lineTo(targetX + tick, targetY);
+      ctx.moveTo(targetX, targetY - tick);
+      ctx.lineTo(targetX, targetY + tick);
+      ctx.moveTo(targetX, targetY);
+      ctx.arc(targetX, targetY, radius, 2 * Math.PI, false);
+      ctx.strokeStyle="Red";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    function toggleAbsRel () {
+      if (absRelFlag == true) {
+        absRelFlag = false;
+        document.getElementById("toglAbsRelBut").innerHTML = "Relative";
+
+      } else {
+        absRelFlag = true;
+        document.getElementById("toglAbsRelBut").innerHTML = "Absolute";
+      }
+    }
+
+    function toggleUnits () {
+      if (mmFlag == true) {
+        mmFlag = false;
+        units = 1;
+        document.getElementById("toggleUnitsBut").innerHTML = "Units: Inches";
+      } else {
+        mmFlag = true;
+        units = 25.4;
+        document.getElementById("toggleUnitsBut").innerHTML = "Units: mm";
+      }
+    }
+
+    function toggleTarget () {
+      if (targMode == true) {
+        targMode = false;
+        document.getElementById("toggleTargetBut").innerHTML = "Position Mode";
+        tgtButton = document.getElementById("toggleTargetBut");
+        tgtButton.classList.remove("button--highlight");
+
+        } else {
+        targMode = true;
+        document.getElementById("toggleTargetBut").innerHTML = "Target Mode";
+        tgtButton = document.getElementById("toggleTargetBut");
+        tgtButton.classList.add("button--highlight");
+
+      }
+    }
+
+    function toggleTgtDisp () {
+      if (targShow == true) {
+        targShow = false;
+        document.getElementById("toggleTarget").innerHTML = "Show Target";
+        document.getElementById("targetCanvas").style.display = "none";
+        } else {
+        targShow = true;
+        document.getElementById("toggleTarget").innerHTML = "Hide Target";
+        document.getElementById("targetCanvas").style.display = "block";
+      }
+    }
+
+    function zeroAll ()  {
+        zeroX();
+        zeroY();
+        zeroZ();
+    }
+    function zeroX ()  {
+        (absRelFlag ? (axX.absOfst = axX.enc) : (axX.relOfst = axX.enc))
+    }
+    function zeroY ()  {
+        (absRelFlag ? (axY.absOfst = axY.enc) : (axY.relOfst = axY.enc))
+    }
+    function zeroZ ()  {
+        (absRelFlag ? (axZ.absOfst = axZ.enc) : (axZ.relOfst = axZ.enc))
+    }
+
+    function scaleAxis (num) {
+        if ( num == 0) {
+            return (0);
+        }
+        var sign = num < 0 ? -1 : 1;
+        num = Math.abs(num * encoderScale);
+        var scaledNum = Math.log(1.5 * num) / Math.log(10000);
+        scaledNum = Math.min(scaledNum, 1);
+        return (sign * scaledNum);
+    };
+
+    function formatDRO (num) {
+        var preDecimalDigits = 4;
+        var postDecimalDigits = 4;
+        var spcsToAdd = 0;
+        var str = '';
+        var aNum = Math.abs(num);
+
+        if (aNum < 1) {
+            spcsToAdd = (preDecimalDigits - 1);
+        } else {
+            spcsToAdd = (preDecimalDigits - 1 - Math.floor(Math.log(aNum) / Math.LN10));
+            if (spcsToAdd < 0) {
+                return num;
+            }
+        }
+        for ( var i = 0; i  < spcsToAdd; i++) {
+            str = "&nbsp;" + str;
+        }
+        return num < 0 ? "-" + str + aNum.toFixed(postDecimalDigits) : "+" + str + aNum.toFixed(postDecimalDigits);
+      };
+
+    function WebSocketDisplay() {
+       var ws = new WebSocket("ws://mPy.local");
+
+       ws.onopen = function() {
+        // Web Socket is connected, send data using send()
+        ws.send("Message to send");
+        // alert("Message is sent...");
+       };
+
+       ws.onmessage = function (evt) {
+          // alert("Message is received...");
+          var myObj = JSON.parse(evt.data)
+          axX.enc = (myObj.X / axX.scale) + (axX.preVal * axX.preSign) - (targMode ? axX.tgt : 0);
+          axY.enc = (myObj.Y / axY.scale) + (axY.preVal * axY.preSign) - (targMode ? axY.tgt : 0);
+          axZ.enc = (myObj.Z / axZ.scale) + (axZ.preVal * axZ.preSign) - (targMode ? axZ.tgt : 0);
+          axX.abs = axX.enc - axX.absOfst;
+          axY.abs = axY.enc - axY.absOfst;
+          axZ.abs = axZ.enc - axZ.absOfst;
+          axX.rel = axX.enc - axX.relOfst;
+          axY.rel = axY.enc - axY.relOfst;
+          axZ.rel = axZ.enc - axZ.relOfst;
+
+          document.getElementById("absX").innerHTML = "&nbsp;X: " + formatDRO((absRelFlag ? axX.abs : axX.rel) * units);
+          document.getElementById("absY").innerHTML = "&nbsp;Y: " + formatDRO((absRelFlag ? axY.abs : axY.rel) * units);
+          document.getElementById("absZ").innerHTML = "&nbsp;Z: " + formatDRO((absRelFlag ? axZ.abs : axZ.rel) * units);
+          drawToGo(toGoXCanvas, scaleAxis(absRelFlag ? axX.abs : axX.rel), scaleAxis(axX.tol));
+          drawToGo(toGoYCanvas, scaleAxis(absRelFlag ? axY.abs : axY.rel), scaleAxis(axY.tol));
+          drawToGo(toGoZCanvas, scaleAxis(absRelFlag ? axZ.abs : axZ.rel), scaleAxis(axZ.tol));
+          drawTarget(targetCanvas, scaleAxis(absRelFlag ? axX.abs : axX.rel), scaleAxis(absRelFlag ? axY.abs : axY.rel), scaleAxis(axX.tol), scaleAxis(axY.tol));
+       };
+
+       ws.onclose = function() {
+          // websocket is closed.
+          // alert("Connection is closed...");
+       };
+     }
+
+    </script>
+  </body>
+</html>
