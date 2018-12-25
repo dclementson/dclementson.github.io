@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html  lang="en">
   <head>
       <title>ESP32 Web DRO</title>
       <!-- <meta content="text/html;charset=utf-8" http-equiv="Content-Type"> -->
@@ -49,7 +49,8 @@
         border: solid 2px black;
         color: Black;
         width: 100vmin;
-    };
+    }
+
     .axisContainer{
         display: -webkit-box;  /* legacy Android */
         display: -webkit-flex;  /* legacy Android */
@@ -322,7 +323,7 @@
   </head>
 
   <body onload="javascript:WebSocketDisplay()">
-    <div class="pageContainer" lang="en">
+    <div class="pageContainer">
         <div class="banner">ESP32 Web-Based DRO</div>
         <div class="axisGroup">
             <div class="axisContainer">
@@ -398,7 +399,8 @@
         </div>
     </div>
 
-    <script type = "text/javascript">
+    <!-- <script type = "text/javascript"> -->
+    <script>
     <!-- =================  Scripts  ===================== -->
     var encoderScale = 2000;
     var editFlag = false; // true while editing a numeric value
